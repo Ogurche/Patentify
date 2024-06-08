@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "hackaton lzt"
+version = "0.1.0"
+description = ""
+authors = ["Ogurche <337398@edu.itmo.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+psycopg2 = "^2.9.9"
+pandas = "^2.2.2"
+sqlalchemy = "^2.0.30"
+django = "^5.0.6"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
