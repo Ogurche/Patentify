@@ -1,3 +1,5 @@
+from django.shortcuts import render
+
 class ExceptionMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
@@ -7,6 +9,5 @@ class ExceptionMiddleware:
         return response
 
     def process_exception(self, request, exception):
-        from django.shortcuts import render
         error_message = str(exception)
         return render(request, 'error.html', {'error_message': error_message})

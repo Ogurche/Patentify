@@ -22,15 +22,13 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     # Ваши URL-обработчики
-    path('', views.upload_file, name='upload_file'),
-    path('process/<str:filename>/', views.process_file, name='process_file'),
-    # остальные маршруты
     path('admin/', admin.site.urls),
     path('', views.upload_file, name='upload_file'),
     path('process/<str:filename>/', views.process_file, name='process_file'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 handler404 = 'myapp.views.custom_error_view'
 handler500 = 'myapp.views.custom_error_view'

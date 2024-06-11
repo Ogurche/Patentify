@@ -9,6 +9,8 @@ def custom_error_view(request, exception=None):
     error_message = str(exception) if exception else "An unexpected error occurred."
     return render(request, 'error.html', {'error_message': error_message})
 
+
+#TODO: mkdir new directory for processing
 def check_in_database(patent_holder):
     # Здесь вы должны реализовать логику проверки в вашей базе данных
     return True  
@@ -24,11 +26,9 @@ def upload_file(request):
 def process_file(request, filename):
     filepath = os.path.join(settings.MEDIA_ROOT, filename)
     try:
-        df = pd.read_csv(filepath, sep=';', encoding= 'utf-8')
+        df = pd.read_csv(filepath, sep=',', encoding= 'utf-8')
     except FileNotFoundError:
         raise Http404("File not found")
-
-    print (df.columns)
 
     if 'patent holders' in df.columns:
         df['checked'] = df['patent holders'].apply(check_in_database)
