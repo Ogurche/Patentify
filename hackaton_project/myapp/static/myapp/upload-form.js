@@ -17,7 +17,7 @@ function updateFileNameDisplay() {
     }
 }
 
-const dropZone = document.querySelector('.upload-section');
+const dropZone = document.querySelector('#upload-section');
 dropZone.addEventListener("drop", dropHandler);
 dropZone.addEventListener("dragover", ev => { ev.preventDefault(); });
 dropZone.addEventListener("dragenter", ev => { ev.preventDefault(); });
