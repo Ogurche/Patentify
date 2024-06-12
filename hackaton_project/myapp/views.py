@@ -4,16 +4,44 @@ from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse, Http404
 from django.shortcuts import render, redirect
+from django.db import connection
+import re
 
 def custom_error_view(request, exception=None):
     error_message = str(exception) if exception else "An unexpected error occurred."
     return render(request, 'error.html', {'error_message': error_message})
 
+def check_in_database(patent_holder, application_num, reg_num, patent_str_dt):
+    with connection.cursor() as cursor:
+        
+        if patent_str_dt == 0:
+            patent_str_dt = None
 
-#TODO: mkdir new directory for processing
-def check_in_database(patent_holder):
-    # Здесь вы должны реализовать логику проверки в вашей базе данных
-    return True  
+        #TODO: Добавить логирование
+        cursor.execute("""SELECT o_inn, o_full_name 
+                       FROM patent_case.find_similarity(
+                            %s::varchar
+                            ,%s::int
+                            ,%s::int 
+                            ,%s::int)"""
+                       , [patent_holder,application_num, reg_num, patent_str_dt])
+        result = cursor.fetchone()
+        if result:
+                o_inn, o_full_name = result
+                return [o_inn, o_full_name]
+        else:
+            return [None, None]  
+def apply_check(row):  
+    o_inn, o_full_name = check_in_database(
+        row['patent holders'],
+        row['application number'],
+        row['registration number'],
+        row['patent starting date']
+    )
+    return pd.Series([o_inn, o_full_name])
+
+def clean_patent_holder(patent_holder):
+    return re.sub(r'\(\b[A-Za-zА-Яа-я]{2,3}\b\)', '', patent_holder).strip()
 
 def upload_file(request):
     if request.method == 'POST' and request.FILES['file']:
@@ -26,12 +54,19 @@ def upload_file(request):
 def process_file(request, filename):
     filepath = os.path.join(settings.MEDIA_ROOT, filename)
     try:
-        df = pd.read_csv(filepath, sep=',', encoding= 'utf-8')
+        df = pd.read_csv(filepath, sep=',', encoding= 'utf-8-sig')
     except FileNotFoundError:
         raise Http404("File not found")
 
     if 'patent holders' in df.columns:
-        df['checked'] = df['patent holders'].apply(check_in_database)
+#govnocode = True
+        df['patent holders'] = df['patent holders'].apply(clean_patent_holder)
+        df['application number'] = df['application number'].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
+        df['registration number'] = df['registration number'].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
+        if 'patent starting date' in df.columns:
+            df['patent starting date'] = df['patent starting date'].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
+
+        df[['inn', 'full_name']] = df.apply(apply_check, axis=1)
         result_filename = 'result_' + filename
         result_filepath = os.path.join(settings.MEDIA_ROOT, result_filename)
         df.to_csv(result_filepath, index=False)
