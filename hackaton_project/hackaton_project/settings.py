@@ -30,7 +30,7 @@ SECRET_KEY = 'django-insecure-u00!l)c&@6k15pv0#84v&z8jj@d#!er#a8ad$n_=1_!&1dd8i3
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['braeval']
 
 
 # Application definition
@@ -80,18 +80,7 @@ WSGI_APPLICATION = 'hackaton_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': database,
-        'USER': user,
-        'PASSWORD': password,
-        'HOST': host,
-        'PORT': port,  
-    }
-}
-
-
+DATABASES = {}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators

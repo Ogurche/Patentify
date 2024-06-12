@@ -8,37 +8,35 @@
     <link rel="stylesheet" href="{% static 'myapp/style.css' %}">
 </head>
 <body>
-    <header>
-        <div class="header-content">
-            <img src="{% static 'myapp/logo.png' %}" alt="Роспатент">
-            <div class="header-right">
-                <button class="btn">Личный кабинет</button>
-                <button class="btn">Оповещения</button>
+    {% include 'elements/header.html' %}
+    <main>
+        <div class="section flex">
+            <img height="50" src="{% static 'myapp/arrow.svg' %}" alt="Назад">
+            <div class="title">нейминг заголовка</div>
+        </div>
+        {% include 'elements/upload.html' %}
+        <div class="section flex flex-spread">
+            <span class="title">История поисков</span>
+            <button class="btn btn-wide">Смотреть все</button>
+        </div>
+        <div id="history-section" class="section">
+            <div class="card bg-white border-light flex flex-column flex-spread">
+                <div>
+                    <div class="subtitle">Name patent</div>
+                    <div>MAYBE SHORT INFORMATION ABOUT IT'S</div>
+                    <div>MAYBE SHORT INFORMATION ABOUT IT'S</div>
+                </div>
+                <button class="btn btn-highlight btn-wide">Button</button>
+            </div>
+            <div class="card bg-white border-light flex flex-column flex-spread">
+                <div>
+                    <div class="subtitle">Name patent</div>
+                    <div>MAYBE SHORT INFORMATION ABOUT IT'S</div>
+                    <div>MAYBE SHORT INFORMATION ABOUT IT'S</div>
+                </div>
+                <button class="btn btn-highlight btn-wide">Button</button>
             </div>
         </div>
-    </header>
-    <main>
-        <section class="upload-section">
-            <h1>нейминг заголовка</h1>
-            <div class="upload-box">
-                <p>Прикрепите или перетащите файл, содержащий информацию по патентам, в строгом соответствии с <a href="#">шаблонным файлом</a></p>
-                <form method="post" enctype="multipart/form-data">
-                    {% csrf_token %}
-                    <input type="file" name="file" id="file-input" class="file-input">
-                    <label for="file-input" class="file-label">Прикрепить файл</label>
-                    <button type="submit" class="btn">Загрузить</button>
-                </form>
-            </div>
-        </section>
-        <section class="history-section">
-            <h2>История поисков</h2>
-            <div class="history-card">
-                <h3>Name patent</h3>
-                <p>MAYBE SHORT INFORMATION ABOUT IT'S</p>
-                <p>MAYBE SHORT INFORMATION ABOUT IT'S</p>
-                <button class="btn">Button</button>
-            </div>
-        </section>
     </main>
 </body>
 </html>
