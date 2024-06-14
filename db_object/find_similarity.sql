@@ -2,6 +2,8 @@ CREATE OR REPLACE FUNCTION patent_case.find_similarity
 ( IN i_patent_holder varchar
 , IN i_application_num int
 , IN i_reg_num int
+, IN i_allow int 
+, IN upload_id int
 , IN i_patent_str_dt int DEFAULT NULL
 , OUT o_inn varchar 
 , OUT o_full_name varchar)
@@ -81,13 +83,17 @@ BEGIN
 			INTO v_patent_type;
 			
 			
-			INSERT INTO patent_request (reg_number, application_num, y, inn, patent_type)
-			VALUES (i_reg_num,i_application_num, 
-					CASE WHEN i_patent_str_dt IS NULL 
+			INSERT INTO patent_request (reg_number, application_num, y, inn, patent_type, is_actual, upload_ident)
+			VALUES (i_reg_num
+					,i_application_num
+					,CASE WHEN i_patent_str_dt IS NULL 
 						THEN EXTRACT (YEAR FROM current_date )
 						ELSE LEFT(i_patent_str_dt::varchar, 4)::int2
-					END 
-					, o_inn, v_patent_type);
+					END
+					, o_inn
+					, v_patent_type
+					, i_allow
+					, upload_id );
 		
 		END IF;
 		
