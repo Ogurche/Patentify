@@ -87,7 +87,8 @@ def process_file(request, filename):
             response = HttpResponse(f, content_type='text/csv')
             response['Content-Disposition'] = f'attachment; filename={result_filename}'
             return response
-        return redirect('analytics', unixtime=unix)
+        #хз как сделать редирект нормально
+        # return redirect('analytics', unixtime=unix)
     else:
         return HttpResponse("No 'patent holders' column found in the file", status=400)
 
