@@ -119,13 +119,14 @@ def do_process_file(request, filename):
 def analytics_view (request, unix):
     with connection.cursor() as cursor:
         cursor.execute ("""SELECT * FROM patent_case.analytics_by_unix(%s::int)""", [unix])
-        data = cursor.fetchall()
+        fields = [field_md[0] for field_md in cursor.description]
+        data = [dict(zip(fields,row)) for row in cursor.fetchall()]
 
         display = dict()
         # i'm sorry
         for entry in data:
-            patent_count = display.setdefault(entry[0].replace(' ', '_'), [0, 0])
-            patent_count[0] += entry[2]
-            patent_count[1] += entry[3]
+            patent_count = display.setdefault(entry['patent_types'].replace(' ', '_'), [0, 0])
+            patent_count[0] += entry['num_of_actual']
+            patent_count[1] += entry['num_of_not_actual']
 
-    return render(request, 'analytics.html', {'data': display})
+    return render(request, 'analytics.html', {'data': data, 'table': display})
