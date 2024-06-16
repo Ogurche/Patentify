@@ -21,7 +21,7 @@ BEGIN
 	 */
 	o_id := NULL; 
 	
-	PERFORM set_limit(0.75);
+	PERFORM set_limit(0.9);
 	
 	SELECT pr.inn, full_name, id
 	INTO o_inn , o_full_name, o_id
