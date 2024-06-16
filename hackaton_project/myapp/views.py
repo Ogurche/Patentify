@@ -13,7 +13,7 @@ def custom_error_view(request, exception=None):
     error_message = str(exception) if exception else "An unexpected error occurred."
     return render(request, 'error.html', {'error_message': error_message})
 
-def check_in_database(patent_holder, application_num, reg_num, patent_str_dt, allow, unix):
+def check_in_database(patent_holder, application_num, reg_num, patent_str_dt, allow, unix, author,address, model, classification):
 
     with connection.cursor() as cursor:
         
@@ -21,7 +21,7 @@ def check_in_database(patent_holder, application_num, reg_num, patent_str_dt, al
             patent_str_dt = None
 
         allow = 1 if str(allow).lower() == 'true' else 0
-        cursor.execute("""SELECT o_inn, o_full_name 
+        cursor.execute("""SELECT o_inn, o_full_name , o_id
                        FROM patent_case.find_similarity(
                             %s::varchar
                             ,%s::int
@@ -32,20 +32,45 @@ def check_in_database(patent_holder, application_num, reg_num, patent_str_dt, al
                        , [patent_holder,application_num, reg_num, allow, unix, patent_str_dt])
         result = cursor.fetchone()
         if result:
-                o_inn, o_full_name = result
+                o_inn, o_full_name, id = result
+                cursor.execute("""UPDATE patent_case.patent_request
+                                SET author = %s, 
+                               address = %s, 
+                               model_name = %s, 
+                               classific = %s
+                               WHERE id = %s"""
+                               , [author, address, model, classification, id])
+                
                 return [o_inn, o_full_name]
         else:
             return [None, None]  
 
-def apply_check(row, unix):  
+def apply_check(row, unix):
+
+    authors = row.get('authors', '')
+    correspondence_address = row.get('correspondence address', '')
+
+    # Проверка наличия названий
+    name_fields = ['utility model name', 'industrial design name', 'invention name']
+    name = next((row[field] for field in name_fields if field in row and pd.notnull(row[field])), '')
+
+    # Проверка наличия mpk и mkpo
+    classification_fields = ['mpk', 'mkpo']
+    classification = next((row[field] for field in classification_fields if field in row and pd.notnull(row[field])), '')  
+
     o_inn, o_full_name = check_in_database(
         row['patent holders'],
         row['application number'],
         row['registration number'],
         row['patent starting date'],
         row['actual'],
-        unix
+        unix,
+        authors,
+        correspondence_address,
+        name,
+        classification
     )
+
     return pd.Series([o_inn, o_full_name])
 
 def clean_patent_holder(patent_holder):
