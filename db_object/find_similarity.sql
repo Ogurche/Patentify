@@ -6,22 +6,25 @@ CREATE OR REPLACE FUNCTION patent_case.find_similarity
 , IN upload_id int
 , IN i_patent_str_dt int DEFAULT NULL
 , OUT o_inn varchar 
-, OUT o_full_name varchar)
+, OUT o_full_name varchar
+, OUT o_id int )
 LANGUAGE plpgsql
 SET SCHEMA 'patent_case'
 AS $func$ 
 DECLARE 
 	
 	v_patent_type int2;
-
+	
 BEGIN 
 	/*
 	 * Сначала проверяем повторное использование
 	 */
+	o_id := NULL; 
+	
 	PERFORM set_limit(0.75);
 	
-	SELECT pr.inn, full_name
-	INTO o_inn , o_full_name
+	SELECT pr.inn, full_name, id
+	INTO o_inn , o_full_name, o_id
 	FROM patent_case.patent_request pr
 	JOIN pure_inn itr 
 		ON itr.inn::varchar = ANY(string_to_array(pr.inn , ',')) 
@@ -93,7 +96,8 @@ BEGIN
 					, o_inn
 					, v_patent_type
 					, i_allow
-					, upload_id );
+					, upload_id )
+			RETURNING id INTO o_id;
 		
 		END IF;
 		

@@ -29,3 +29,8 @@ COMMENT ON COLUMN patent_case.patent_request.patent_type IS 'Тип патент
 CREATE INDEX req_inn_idx ON patent_case.patent_request(inn);
 CREATE INDEX req_rap_num_idx ON patent_case.patent_request(application_num);
 
+ALTER TABLE patent_request 
+ADD COLUMN author varchar,
+ADD COLUMN address varchar,
+ADD COLUMN model_name varchar,
+ADD COLUMN classific varchar;
