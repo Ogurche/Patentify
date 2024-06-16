@@ -135,10 +135,10 @@ def do_process_file(request, filename):
 
         df.to_csv(result_filepath, index=False)
         with open(result_filepath, 'rb') as f:
-            response = HttpResponse(f, content_type='text/csv')
-            response['Content-Disposition'] = f'attachment; filename={result_filename}'
-            return response
-            # return JsonResponse(data={'status': 'ok', 'id': unix})
+            # response = HttpResponse(f, content_type='text/csv')
+            # response['Content-Disposition'] = f'attachment; filename={result_filename}'
+            # return response
+            return JsonResponse(data={'status': 'ok', 'id': unix})
         #хз как сделать редирект нормально
         # return redirect('analytics', unixtime=unix)
     else:

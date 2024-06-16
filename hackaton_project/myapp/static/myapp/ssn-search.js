@@ -61,10 +61,15 @@ function getRow(dataRow, inn) {
         }
     }
 
+    const id = (v) => v ? v : 'Нет данных';
+
     const columns = [
         {field: 'patent_type', cb: patentTypeText},
-        {field: 'reg_number', cb: (num) => num},
+        {field: 'reg_number', cb: id},
+        {field: 'model_name', cb: id},
+        {field: 'author', cb: id},
         {field: 'inn', cb: (_) => inn},
+        {field: 'address', cb: id},
     ];
 
     const tr = document.createElement('tr');
@@ -80,7 +85,10 @@ function getTable(data, inn) {
     const headers = [
         'Patent type',
         'Registration number',
+        'Patent Name',
+        'Patent Assignee',
         'Tax ID',
+        'Registration Address',
     ];
 
     const card = document.createElement('div');
