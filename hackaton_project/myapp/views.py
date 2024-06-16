@@ -134,11 +134,11 @@ def do_process_file(request, filename):
         result_filepath = os.path.join(settings.MEDIA_ROOT, result_filename)
 
         df.to_csv(result_filepath, index=False)
-        with open(result_filepath, 'rb') as f:
-            # response = HttpResponse(f, content_type='text/csv')
-            # response['Content-Disposition'] = f'attachment; filename={result_filename}'
-            # return response
-            return JsonResponse(data={'status': 'ok', 'id': unix})
+        # with open(result_filepath, 'rb') as f:
+        #     # response = HttpResponse(f, content_type='text/csv')
+        #     # response['Content-Disposition'] = f'attachment; filename={result_filename}'
+        #     # return response
+        return JsonResponse(data={'status': 'ok', 'id': unix, 'filepath': result_filepath})
         #хз как сделать редирект нормально
         # return redirect('analytics', unixtime=unix)
     else:
@@ -158,3 +158,10 @@ def analytics_view (request, unix):
             patent_count[1] += entry['num_of_not_actual']
 
     return render(request, 'analytics.html', {'data': data, 'table': display})
+
+
+def download(request, filepath):
+    with open(filepath, 'rb') as f:
+        response = HttpResponse(f, content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename={filepath}'
+        return response
