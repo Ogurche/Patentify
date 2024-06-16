@@ -115,14 +115,14 @@ table {
 table th {
     text-align: left;
     font-size: 0.85em;
+    padding: 10px;
     padding-bottom: 20px;
     border-bottom: 1px solid var(--bg-aux);
 }
 
 table td {
     font-size: 0.6em;
-    padding-top: 10px;
-    padding-bottom: 10px;
+    padding: 10px;
     border-bottom: 1px solid var(--bg-aux);
 }
 
@@ -140,7 +140,7 @@ table td {
 #analytics-section {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    gap: 60px;
 }
 
 #analytics-section .flex {

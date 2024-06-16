@@ -28,17 +28,19 @@
             </div>
             <div class="flex flex-column card bg-white">
                 <div class="title">Распределение патентов на промышленные образцы по классам МКПО (Топ-10)</div>
-                <img height="300" width="375" src="https://http.cat/404">
+                <canvas id="hist-prom" style="width: 100%; height: 300px"></canvas>
             </div>
             <div class="flex flex-column card bg-white">
                 <div class="title">Распределение патентов на изобретения по классам МПК (Топ-10)</div>
-                <img height="300" width="375" src="https://http.cat/404">
+                <canvas id="hist-inv" style="width: 100%; height: 300px"></canvas>
             </div>
             <div class="flex flex-column card bg-white">
-                <div class="title">Распределение патентов на изобретения по классам МПК (Топ-10)</div>
-                <img height="300" width="375" src="https://http.cat/404">
+                <div class="title">Распределение патентов на полезные модели по классам МПК (Топ-10)</div>
+                <canvas id="hist-model" style="width: 100%; height: 300px"></canvas>
             </div>
         </div>
+        <script>const analyticsJson = "{{ data|safe }}".replaceAll("'", '"')</script>
+        <script src="{% static 'myapp/analytics.js' %}"></script>
     </main>
 </body>
 </html>
