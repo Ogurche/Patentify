@@ -1,106 +1,162 @@
+:root {
+    --bg-main: #f5f5f5;
+    --bg-aux: #d9d9d9;
+    --primary: #2d3648;
+    --error-primary: #c20d19;
+}
+
+/* ... */
+
 body {
     font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f5f5f5;
+    font-size: 28px;
+    line-height: 36px;
+    background-color: var(--bg-main);
 }
 
-header {
-    background-color: #ffffff;
-    padding: 10px 20px;
-    border-bottom: 1px solid #ccc;
+/* ... */
+
+.bg-white { background-color: white; }
+.bg-aux { background-color: var(--bg-aux); }
+.bg-primary { background-color: var(--primary); }
+.border-light { border: 2px solid var(--bg-aux); }
+.border-dark { border: 2px solid var(--primary); }
+
+/* ... */
+
+.header {
+    padding: 12px 20px;
+    border-bottom: 2px solid var(--bg-aux);
 }
 
-.header-content {
+.section {
+    margin: 20px;
+}
+
+.card {
+    padding: 20px;
+    border-radius: 20px;
+}
+
+/* ... */
+
+.flex {
     display: flex;
-    justify-content: space-between;
+    gap: 12px;
     align-items: center;
 }
 
-.header-right {
-    display: flex;
-    gap: 10px;
+.flex-column {
+    flex-direction: column;
 }
 
-.header-content img {
-    height: 50px;
+.flex-spread {
+    justify-content: space-between;
 }
 
-.btn {
-    padding: 10px 20px;
-    border: none;
-    background-color: #333;
-    color: #fff;
-    cursor: pointer;
-    border-radius: 5px;
+.flex-centered {
+    justify-content: center;
 }
 
-.btn:hover {
-    background-color: #555;
+.errortext {
+    font-size: 0.6em;
+    font-weight: bold;
+    color: var(--error-primary);
 }
 
-main {
-    padding: 20px;
-}
-
-.upload-section {
-    text-align: center;
-    background-color: #e9ecef;
-    padding: 230px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-}
-
-.upload-box {
-    background-color: #f1f1f1;
-    padding: 20px;
-    border-radius: 10px;
-    display: inline-block;
-    width: 80%;
-}
-
-.upload-box p {
-    margin: 0 0 10px;
-}
-
-.file-input {
+.hidden {
     display: none;
 }
 
-.file-label {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: #fff;
-    border-radius: 5px;
+/* ... */
+
+.btn {
+    padding: 12px 20px;
+    background-color: var(--primary);
+    color: white;
+    border: 2px solid var(--primary);
     cursor: pointer;
-    margin-bottom: 10px;
+    border-radius: 20px;
+    font-size: 0.7em;
+    min-width: 150px;
 }
 
-.file-label:hover {
-    background-color: #0056b3;
+.btn:hover {
+    background-color: color-mix(in srgb, var(--bg-main) 20%, var(--primary));
 }
 
-.history-section {
+.btn:disabled {
+    background-color: transparent;
+    color: black;
+}
+
+.textbox {
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid var(--bg-aux);
+    width: 200px;
+    font-size: 0.7em;
+    padding: 10px;
+}
+
+/* ... */
+
+.title {
+    font-size: 1.2em;
+    line-height: 1.7em;
+}
+
+/* ... */
+
+table {
+    width: 100%;
+}
+
+table th {
+    text-align: left;
+    font-size: 0.85em;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--bg-aux);
+}
+
+table td {
+    font-size: 0.6em;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--bg-aux);
+}
+
+/* ... */
+
+#upload-box {
     text-align: center;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 10px;
+    max-width: 50vw;
 }
 
-.history-card {
-    text-align: center;
-    background-color: #f8f9fa;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    margin-bottom: 10px;
+#upload-box input[type="file"] {
+    display: none;
 }
 
-.history-card h3 {
-    margin-top: 0;
+#analytics-section {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
 }
 
-.history-card button {
-    margin-top: 10px;
+#analytics-section .flex {
+    align-items: normal;
+    padding: 40px;
+}
+
+#analytics-section .title {
+    font-size: 0.8em;
+}
+
+#back-link {
+    text-decoration: none;
+    color: black;
+    font-size: 0.6em;
+    border-radius: 20px;
+    padding: 5px 20px;
+    width: fit-content;
 }

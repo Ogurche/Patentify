@@ -1,20 +1,44 @@
-<table>
-    <thead>
-        <tr>
-            <th>Тип Патента</th>
-            <th>Всего патентов по типу</th>
-            <th>Всего патентов по типу активных</th>
-            <th>Всего патентов по типу неактивных</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for row in data %}
-        <tr>
-            <td>{{ row.0 }}</td>
-            <td>{{ row.1 }}</td>
-            <td>{{ row.2 }}</td>
-            <td>{{ row.3 }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patentify</title>
+    <link rel="stylesheet" href="{% static 'myapp/style.css' %}">
+</head>
+<body>
+    {% include 'elements/header.html' %}
+    <main>
+        <a href="/" id="back-link" class="section bg-white border-dark flex">
+            <img height="24" src="{% static 'myapp/arrow.svg' %}" alt="Назад">
+            <div style="display:inline-block;">Назад</div>
+        </a>
+        <div class="section title">Аналитика</div>
+        <div id="analytics-section" class="section">
+            <div class="flex card bg-white">
+                <table>
+                    <tr><td>Количество действующих изобретений</td><td>{{ table.Изобретение.0|default:"0" }}</td></tr>
+                    <tr><td>Количество недействующих изобретений</td><td>{{ table.Изобретение.1|default:"0" }}</td></tr>
+                    <tr><td>Количество действующих полезных моделей</td><td>{{ table.Полезная_модель.0|default:"0" }}</td></tr>
+                    <tr><td>Количество недействующих полезных моделей</td><td>{{ table.Полезная_модель.1|default:"0" }}</td></tr>
+                    <tr><td>Количество действующих промышленных образцов</td><td>{{ table.Промышленные_образцы.0|default:"0" }}</td></tr>
+                    <tr><td>Количество недействующих промышленных образцов</td><td>{{ table.Промышленные_образцы.1|default:"0" }}</td></tr>
+                </table>
+            </div>
+            <div class="flex flex-column card bg-white">
+                <div class="title">Распределение патентов на промышленные образцы по классам МКПО (Топ-10)</div>
+                <img height="300" width="375" src="https://http.cat/404">
+            </div>
+            <div class="flex flex-column card bg-white">
+                <div class="title">Распределение патентов на изобретения по классам МПК (Топ-10)</div>
+                <img height="300" width="375" src="https://http.cat/404">
+            </div>
+            <div class="flex flex-column card bg-white">
+                <div class="title">Распределение патентов на изобретения по классам МПК (Топ-10)</div>
+                <img height="300" width="375" src="https://http.cat/404">
+            </div>
+        </div>
+    </main>
+</body>
+</html>
