@@ -2,7 +2,7 @@ import os
 import pandas as pd
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render, redirect
 from django.db import connection
 import re
@@ -59,12 +59,35 @@ def upload_file(request):
         return redirect('process_file', filename=filename)
     return render(request, 'upload.html')
 
+def search_db(request):
+    try:
+        inn = request.GET.get('inn')
+        if not inn:
+            return JsonResponse(status=400, data={'status': 'error', 'message': 'Параметр ИНН отсутствует'})
+        if not inn.isnumeric():
+            return JsonResponse(status=400, data={'status': 'error', 'message': 'Введенный ИНН не является числом'})
+        
+        with connection.cursor() as cursor:
+            cursor.execute("""SELECT * from patent_case.patent_request WHERE %s::varchar = ANY(string_to_array(inn , ','))""", [inn])
+            fields = [field_md[0] for field_md in cursor.description]
+            data = [dict(zip(fields,row)) for row in cursor.fetchall()]
+
+        return JsonResponse(data={'status': 'ok', 'data': data})
+    except Exception as exc:
+        return JsonResponse(status=500, data={'status': 'server_failure', 'message': str(exc)})
+
 def process_file(request, filename):
+    try:
+        return do_process_file(request, filename)
+    except Exception as exc:
+        return JsonResponse(status=500, data={'status': 'server_failure', 'message': str(exc)})
+
+def do_process_file(request, filename):
     filepath = os.path.join(settings.MEDIA_ROOT, filename)
     try:
         df = pd.read_csv(filepath, sep=',', encoding= 'utf-8-sig')
     except FileNotFoundError:
-        raise Http404("File not found")
+        return JsonResponse(status=404, data={'status': 'error', 'message': "File not found"})
 
     unix = int(time.time())
 
@@ -84,13 +107,14 @@ def process_file(request, filename):
         result_filepath = os.path.join(settings.MEDIA_ROOT, result_filename)
         df.to_csv(result_filepath, index=False)
         with open(result_filepath, 'rb') as f:
-            response = HttpResponse(f, content_type='text/csv')
-            response['Content-Disposition'] = f'attachment; filename={result_filename}'
-            return response
+            # response = HttpResponse(f, content_type='text/csv')
+            # response['Content-Disposition'] = f'attachment; filename={result_filename}'
+            # return response
+            return JsonResponse(data={'status': 'ok', 'id': unix})
         #хз как сделать редирект нормально
         # return redirect('analytics', unixtime=unix)
     else:
-        return HttpResponse("No 'patent holders' column found in the file", status=400)
+        return JsonResponse(status=400, data={'status': 'error', 'data': "No 'patent holders' column found in the file"})
 
 def analytics_view (request, unix):
     with connection.cursor() as cursor:
