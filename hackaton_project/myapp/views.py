@@ -159,7 +159,6 @@ def analytics_view (request, unix):
 
     return render(request, 'analytics.html', {'data': data, 'table': display})
 
-
 def download(request, filepath):
     with open(filepath, 'rb') as f:
         response = HttpResponse(f, content_type='text/csv')
