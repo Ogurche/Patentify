@@ -114,9 +114,9 @@ def do_process_file(request, filename):
         with open(filepath, encoding= 'utf-8') as fp:
             delimiter = sniffer.sniff(fp.read(300)).delimiter
         df = pd.read_csv(filepath,sep=delimiter, encoding= 'utf-8-sig')
+        unix = int(time.time())
     except FileNotFoundError:
         return JsonResponse(status=404, data={'status': 'error', 'message': "File not found"})
-    unix = int(time.time())
 
     if 'patent holders' in df.columns:
 #govnocode = True
