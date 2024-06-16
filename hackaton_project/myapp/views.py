@@ -7,6 +7,7 @@ from django.shortcuts import render, redirect
 from django.db import connection
 import re
 import time
+import csv 
 
 def custom_error_view(request, exception=None):
     error_message = str(exception) if exception else "An unexpected error occurred."
@@ -20,7 +21,6 @@ def check_in_database(patent_holder, application_num, reg_num, patent_str_dt, al
             patent_str_dt = None
 
         allow = 1 if str(allow).lower() == 'true' else 0
-
         cursor.execute("""SELECT o_inn, o_full_name 
                        FROM patent_case.find_similarity(
                             %s::varchar
@@ -85,14 +85,15 @@ def process_file(request, filename):
 def do_process_file(request, filename):
     filepath = os.path.join(settings.MEDIA_ROOT, filename)
     try:
-        df = pd.read_csv(filepath, sep=',', encoding= 'utf-8-sig')
+        sniffer = csv.Sniffer()
+        with open(filepath, encoding= 'utf-8') as fp:
+            delimiter = sniffer.sniff(fp.read(300)).delimiter
+        df = pd.read_csv(filepath,sep=delimiter, encoding= 'utf-8-sig')
     except FileNotFoundError:
         return JsonResponse(status=404, data={'status': 'error', 'message': "File not found"})
-
     unix = int(time.time())
 
     if 'patent holders' in df.columns:
-
 #govnocode = True
         df['patent holders'] = df['patent holders'].apply(clean_patent_holder)
         df['application number'] = df['application number'].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
@@ -101,10 +102,12 @@ def do_process_file(request, filename):
         if 'patent starting date' in df.columns:
             df['patent starting date'] = df['patent starting date'].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
 
+
         df[['inn', 'full_name']] = df.apply(apply_check, axis=1, args=(unix,))
 
         result_filename = 'result_' + filename
         result_filepath = os.path.join(settings.MEDIA_ROOT, result_filename)
+
         df.to_csv(result_filepath, index=False)
         with open(result_filepath, 'rb') as f:
             response = HttpResponse(f, content_type='text/csv')
