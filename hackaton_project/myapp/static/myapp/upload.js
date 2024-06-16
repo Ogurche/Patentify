@@ -41,6 +41,8 @@ uploadBox.addEventListener('submit', (event) => {
 
     const getButton = (id) => {
         const button = document.createElement('a');
+        button.style['text-decoration'] = 'none';
+        button.style['font-color'] = 'black';
         button.textContent = 'Перейти к аналитике загруженного файла';
         button.href = `/analytics/${id}`;
         button.classList.add('btn', 'btn-highlight');
