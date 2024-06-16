@@ -29,7 +29,7 @@ WORKDIR /app/hackaton_project
 
 # Настраиваем переменные окружения
 ENV PYTHONUNBUFFERED 1
-ENV DJANGO_SETTINGS_MODULE hackaton.settings
+ENV DJANGO_SETTINGS_MODULE hackaton_project.settings
 
 # Открываем порт
 EXPOSE 8000
