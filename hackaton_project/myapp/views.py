@@ -121,4 +121,11 @@ def analytics_view (request, unix):
         cursor.execute ("""SELECT * FROM patent_case.analytics_by_unix(%s::int)""", [unix])
         data = cursor.fetchall()
 
-    return render(request, 'analytics.html', {'data': data})
+        display = dict()
+        # i'm sorry
+        for entry in data:
+            patent_count = display.setdefault(entry[0].replace(' ', '_'), [0, 0])
+            patent_count[0] += entry[2]
+            patent_count[1] += entry[3]
+
+    return render(request, 'analytics.html', {'data': display})

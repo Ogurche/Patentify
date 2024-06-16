@@ -110,7 +110,6 @@ body {
 
 table {
     width: 100%;
-
 }
 
 table th {
@@ -138,16 +137,26 @@ table td {
     display: none;
 }
 
-#history-section {
+#analytics-section {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
 }
 
-#history-section .flex {
+#analytics-section .flex {
     align-items: normal;
+    padding: 40px;
 }
 
-#history-section .flex .btn {
-    align-self: end;
+#analytics-section .title {
+    font-size: 0.8em;
+}
+
+#back-link {
+    text-decoration: none;
+    color: black;
+    font-size: 0.6em;
+    border-radius: 20px;
+    padding: 5px 20px;
+    width: fit-content;
 }
