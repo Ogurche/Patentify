@@ -39,14 +39,26 @@ uploadBox.addEventListener('submit', (event) => {
         return errorMsg;
     }
 
-    const getButton = (id) => {
+    const getButton = (text, href) => {
         const button = document.createElement('a');
         button.style['text-decoration'] = 'none';
         button.style['font-color'] = 'black';
-        button.textContent = 'Перейти к аналитике загруженного файла';
-        button.href = `/analytics/${id}`;
+        button.textContent = text;
+        button.href = encodeURIComponent(href);
         button.classList.add('btn', 'btn-highlight');
         return button;
+    }
+
+    const getTransitions = (result) => {
+        const elem = document.createElement('div');
+        elem.classList.add('flex', 'flex-centered');
+
+        elem.append(
+            getButton('Скачать обработанный файл', `download/${result.filepath}`),
+            getButton('Перейти к аналитике', `analytics/${result.id}`),
+        );
+
+        return elem;
     }
 
     fetch(uploadBox.action, {
@@ -54,7 +66,7 @@ uploadBox.addEventListener('submit', (event) => {
         body: new FormData(uploadBox),
     })
     .then(response => response.ok
-        ? response.json().then(json => renderElement(getButton(json.id)))
+        ? response.json().then(json => renderElement(getTransitions(json)))
         : response.json().then(json => renderElement(getErrorMsg(json.message)))
     )
     .finally(() => {

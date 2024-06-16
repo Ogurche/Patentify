@@ -26,6 +26,7 @@ urlpatterns = [
     path('', views.upload_file, name='upload_file'),
     path('search/', views.search_db, name='search'),
     path('process/<str:filename>/', views.process_file, name='process_file'),
+    path('download/<str:filepath>/', views.download, name='download'),
     path('analytics/<int:unix>/', views.analytics_view, name='analytics'),
 ]
 
