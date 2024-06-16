@@ -20,6 +20,7 @@ function updateFileNameDisplay() {
 }
 
 uploadBox.addEventListener('submit', (event) => {
+    return;
     event.preventDefault();
 
     uploadSubmit.textContent = 'Ожидание...';
