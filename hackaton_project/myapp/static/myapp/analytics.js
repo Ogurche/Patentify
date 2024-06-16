@@ -16,7 +16,14 @@ function renderAnalytics(type, histId) {
         .map(obj => [obj.classific, obj.num_of_patent_by_type]))
 
     const hist = document.getElementById(histId);
-    drawHistogram(hist, histData, 'Классы', 'Количество');
+    drawHistogram(hist, histData, 'Классы', 'Количество\nпатентов');
+}
+
+function drawMultilineText(ctx, text, startX, startY, maxWidth, lineHeight) {
+    for (const line of text.split('\n')) {
+        ctx.fillText(line, startX, startY, maxWidth);
+        startY += lineHeight;
+    }
 }
 
 function drawHistogram(canvas, data, legendX, legendY) {
@@ -53,8 +60,8 @@ function drawHistogram(canvas, data, legendX, legendY) {
     ctx.clearRect(0, 0, width, height);
 
     ctx.font = "20px sans-serif";
-    ctx.fillText(legendX, axisY, axisX + labelXHeight + 20);
-    ctx.fillText(legendY, 0, 20);
+    drawMultilineText(ctx, legendX, axisY, axisX + labelXHeight + 20, legendYWidth, 30);
+    drawMultilineText(ctx, legendY, 0, 20, width, 30);
 
     ctx.strokeStyle = '#d9d9d9';
     ctx.beginPath();
