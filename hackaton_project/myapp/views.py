@@ -73,8 +73,17 @@ def apply_check(row, unix):
 
     return pd.Series([o_inn, o_full_name])
 
-def clean_patent_holder(patent_holder):
-    return re.sub(r'\(\b[A-Za-zА-Яа-я]{2,3}\b\)', '', patent_holder).strip()
+# Функция для разделения склеенных ФИО
+# И убираем (все что в скобках) пренадлежность к стране 
+def split_names(text):
+    text = re.sub(r'\(\b[A-Za-zА-Яа-я]{2,3}\b\)', '', text).strip()
+    return re.sub(r'([А-Я][а-я]+)([А-Я])', r'\1, \2', text)
+
+# Функция для добавления запятых после каждого ФИО и приведения к нижнему регистру
+def process_names(text):
+    names = split_names(text).strip().split('\n')
+    processed_names = [name.strip().lower() for name in names]
+    return ','.join(processed_names)
 
 def upload_file(request):
     if request.method == 'POST' and request.FILES['file']:
@@ -120,7 +129,7 @@ def do_process_file(request, filename):
 
     if 'patent holders' in df.columns:
 #govnocode = True
-        df['patent holders'] = df['patent holders'].apply(clean_patent_holder)
+        df['patent holders'] = df['patent holders'].apply(process_names)
         df['application number'] = df['application number'].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
         df['registration number'] = df['registration number'].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
 
