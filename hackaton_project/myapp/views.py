@@ -8,6 +8,19 @@ from django.db import connection
 import re
 import time
 import csv 
+from concurrent.futures import ThreadPoolExecutor, as_completed 
+
+# Функция для разделения склеенных ФИО
+# И убираем (все что в скобках) пренадлежность к стране 
+def split_names(text):
+    text = re.sub(r'\(\b[A-Za-zА-Яа-я]{2,3}\b\)', '', text).strip()
+    return re.sub(r'([А-Я][а-я]+)([А-Я])', r'\1, \2', text)
+
+# Функция для добавления запятых после каждого ФИО и приведения к нижнему регистру
+def process_names(text):
+    names = split_names(text).strip().split('\n')
+    processed_names = [name.strip().lower() for name in names]
+    return ','.join(processed_names)
 
 def custom_error_view(request, exception=None):
     error_message = str(exception) if exception else "An unexpected error occurred."
@@ -41,6 +54,7 @@ def check_in_database(patent_holder, application_num, reg_num, patent_str_dt, al
                                WHERE id = %s"""
                                , [author, address, model, classification, id])
                 
+                # print ([o_inn, o_full_name])
                 return [o_inn, o_full_name]
         else:
             return [None, None]  
@@ -70,20 +84,8 @@ def apply_check(row, unix):
         name,
         classification
     )
-
+    # print (o_inn, o_full_name)
     return pd.Series([o_inn, o_full_name])
-
-# Функция для разделения склеенных ФИО
-# И убираем (все что в скобках) пренадлежность к стране 
-def split_names(text):
-    text = re.sub(r'\(\b[A-Za-zА-Яа-я]{2,3}\b\)', '', text).strip()
-    return re.sub(r'([А-Я][а-я]+)([А-Я])', r'\1, \2', text)
-
-# Функция для добавления запятых после каждого ФИО и приведения к нижнему регистру
-def process_names(text):
-    names = split_names(text).strip().split('\n')
-    processed_names = [name.strip().lower() for name in names]
-    return ','.join(processed_names)
 
 def upload_file(request):
     if request.method == 'POST' and request.FILES['file']:
@@ -121,9 +123,10 @@ def do_process_file(request, filename):
     try:
         sniffer = csv.Sniffer()
         with open(filepath, encoding= 'utf-8') as fp:
-            delimiter = sniffer.sniff(fp.read(300)).delimiter
+            delimiter = sniffer.sniff(fp.read(100)).delimiter
         df = pd.read_csv(filepath,sep=delimiter, encoding= 'utf-8-sig')
         unix = int(time.time())
+    
     except FileNotFoundError:
         return JsonResponse(status=404, data={'status': 'error', 'message': "File not found"})
 
@@ -131,22 +134,29 @@ def do_process_file(request, filename):
 #govnocode = True
         df['patent holders'] = df['patent holders'].apply(process_names)
         df['application number'] = df['application number'].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
-        df['registration number'] = df['registration number'].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
+        df['registration number'] = df['registration number'].apply(pd.to_numeric, errors='coerce').astype(int)
 
         if 'patent starting date' in df.columns:
             df['patent starting date'] = df['patent starting date'].apply(pd.to_numeric, errors='coerce').fillna(0).astype(int)
 
-
-        df[['inn', 'full_name']] = df.apply(apply_check, axis=1, args=(unix,))
+#Параллельная обработка
+        with ThreadPoolExecutor(max_workers=50) as executor:
+            futures = {executor.submit(apply_check, row, unix): index for index, row in df.iterrows()}
+            
+            for future in as_completed(futures):
+                index = futures[future]
+                
+                try:
+                    result = future.result()
+                    df.at[index, 'inn'] = result[0]
+                    df.at[index, 'full_name'] = result[1]
+                except Exception as e:
+                    print(f"Error processing row {index}: {e}")
 
         result_filename = 'result_' + filename
         result_filepath = os.path.join(settings.MEDIA_ROOT, result_filename)
 
         df.to_csv(result_filepath, index=False)
-        # with open(result_filepath, 'rb') as f:
-        #     # response = HttpResponse(f, content_type='text/csv')
-        #     # response['Content-Disposition'] = f'attachment; filename={result_filename}'
-        #     # return response
         return JsonResponse(data={'status': 'ok', 'id': unix, 'filepath': result_filename})
         #хз как сделать редирект нормально
         # return redirect('analytics', unixtime=unix)

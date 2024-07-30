@@ -5,9 +5,6 @@ CREATE OR REPLACE FUNCTION patent_case.find_similarity
 , IN i_allow int DEFAULT 1 
 , IN upload_id int DEFAULT 999
 , IN i_patent_str_dt int DEFAULT NULL
-, IN i_author varchar DEFAULT NULL 
-, IN i_invention varchar DEFAULT NULL 
-, IN i_patent_type int DEFAULT NULL
 , OUT o_inn varchar 
 , OUT o_full_name varchar
 , OUT o_id int )

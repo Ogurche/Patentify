@@ -27,18 +27,24 @@ def split_names(text):
 def process_names(text):
     names = split_names(text).strip().split('\n')
     processed_names = [name.strip().lower() for name in names]
-    return ', '.join(processed_names)
+    return ','.join(processed_names)
 
 # Функция для выполнения поисковой функции для одного ФИО и регистрационного номера
-def call_search_function(fio, rg, type_p):
+def call_search_function(fio, rg, type_p, adrs,auth, pat_nm):
     # conn = None 
     try:
         conn = psycopg2.connect(**DB_CONFIG)
         conn.autocommit = True
         cur = conn.cursor()
         fio = process_names(fio)
-        cur.execute("SELECT o_inn, o_full_name , o_id FROM patent_case.find_similarity_2(i_patent_holder := %s, i_reg_num := %s, i_patent_type := %s)"
-                    , (fio, rg, type_p))
+        cur.execute('''SELECT o_inn, o_full_name , o_id FROM inn_matching.find_similarity_v2(
+                        i_patent_holder := %s
+                        , i_reg_num := %s
+                        , i_patent_type := %s
+                        , i_address := %s
+                        , i_author := %s
+                        , i_invent_name := %s)'''
+                    , (fio, rg, type_p, adrs,auth, pat_nm))
         result = cur.fetchone()
         cur.close()
         conn.close()
@@ -56,37 +62,54 @@ def get_all_fio():
         conn = psycopg2.connect(**DB_CONFIG)
         cur = conn.cursor()
         cur.execute('''SELECT 
-                            s."patent holders"  as fio
-                            , s."﻿registration number"
-                        FROM patent_case.utillity_model s 
-                        LEFT JOIN patent_case.patent_request p 
-                            ON s."﻿registration number" = p.reg_number::varchar
+                            s.patent_holder  as fio
+                            , s.reg_num
+                            ,case p_type
+                                when 'полезные модели'
+                                then 2 
+                                when 'промышленные образцы'
+                                then 3      
+                                when 'изобретения'
+                                then 1
+                                else 4
+                            END as type_p
+                            , s.address as address
+                            , s.authors
+                            , s.patent_name
+                        FROM inn_matching.patent_matching_tbl s 
+                        LEFT JOIN inn_matching.patent_request p 
+                            ON s.reg_num = p.reg_number::varchar
                         WHERE p.reg_number IS NULL
-                            and s."patent holders"  != 'NULL'
-                            and s."patent holders"  IS NOT NULL
-                        order by s."patent holders"  asc  ''')
+                            and s.patent_holder  != 'NULL'
+                            and s.patent_holder IS NOT NULL
+                        order by s.patent_holder asc
+                        limit 100000''')
         rows = cur.fetchall()
         fio_list = [row[0] for row in rows]
         rg_list = [row[1] for row in rows]
+        type_p = [row[2] for row in rows]
+        adr = [row[3] for row in rows]
+        authors = [row[4] for row in rows]
+        patent_name = [row[5] for row in rows]
         # invent = [row[2] for row in rows]
         # auth = [row[3] for row in rows]
         cur.close()
         conn.close()
         print("get_all_fio done")
-        return fio_list, rg_list
+        return fio_list, rg_list, type_p, adr, authors, patent_name
     except Exception as e:
         print(f"Error fetching FIO list: {e}")
-        return [], []
+        return [], [], [], [], [], []
 
 def main():
-    fio_list, rg_list = get_all_fio()
+    fio_list, rg_list, type_p, adrs,auth, pat_nm  = get_all_fio()
     if not fio_list:
         print("No FIOs found or error occurred.")
         return
 
     with ThreadPoolExecutor(max_workers=50) as executor:
-        type_p = 2
-        futures = {executor.submit(call_search_function, fio, rg, type_p): (fio, rg) for fio, rg in zip(fio_list, rg_list)}
+        futures = {executor.submit(call_search_function, fio, rg, types, adr,authr, patm)
+                   : (fio, rg,types, adr,authr, patm) for fio, rg, types, adr,authr, patm in zip(fio_list, rg_list,type_p, adrs,auth, pat_nm)}
         for future in as_completed(futures):
             fio, rg = futures[future]
             try:

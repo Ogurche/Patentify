@@ -23,15 +23,15 @@ def insert_file_into_db():
         columns = ["ID компании",
                     "Наименование полное",
                     "Наименование краткое",
-                    "ИНН",
+                    "инн",
                     "Юр адрес",
                     "Факт адрес",
-                    "ОГРН",
+                    "огрн",
                     "Головная компания (1) или филиал (0)",
-                    "КПП",
+                    "кпп",
                     "ОКОПФ (код)",
                     "ОКОПФ (расшифровка)",
-                    "ОКВЭД2",
+                    "оквэд2",
                     "ОКВЭД2 расшифровка",
                     "Дата создания",
                     "статус по ЕГРЮЛ ",
@@ -41,7 +41,7 @@ def insert_file_into_db():
                     "id Компании-наследника (реорганиза",
                     "телефоны СПАРК",
                     "почта СПАРК",
-                    "Сайты",
+                    "сайты",
                     "ФИО директора",
                     "Название должности",
                     "доп. ОКВЭД2"]
@@ -52,8 +52,8 @@ def insert_file_into_db():
             file = file_path +'\\'+ file
             dfr = pds.read_csv(file,encoding='utf-8',sep=';', on_bad_lines='skip', header=None, names=columns)
 
-            dfr.to_sql(name='inn_tbl', con=conn
-                    , schema='patent_case', if_exists='append'
+            dfr.to_sql(name='inn_raw', con=conn
+                    , schema='inn_matching', if_exists='append'
                     , index= False
                     , chunksize= 2000)                     
             
