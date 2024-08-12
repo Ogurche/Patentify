@@ -43,7 +43,8 @@ def call_search_function(fio, rg, type_p, adrs,auth, pat_nm):
                         , i_patent_type := %s
                         , i_address := %s
                         , i_author := %s
-                        , i_invent_name := %s)'''
+                        , i_invent_name := %s
+                        , upload_id := 20232)'''
                     , (fio, rg, type_p, adrs,auth, pat_nm))
         result = cur.fetchone()
         cur.close()
@@ -79,11 +80,14 @@ def get_all_fio():
                         FROM inn_matching.patent_matching_tbl s 
                         LEFT JOIN inn_matching.patent_request p 
                             ON s.reg_num = p.reg_number::varchar
-                        WHERE p.reg_number IS NULL
+                        WHERE 
+                            p.reg_number IS NULL    
                             and s.patent_holder  != 'NULL'
                             and s.patent_holder IS NOT NULL
+                            and s.id >= 660000
                         order by s.patent_holder asc
-                        limit 100000''')
+                        ''')
+        
         rows = cur.fetchall()
         fio_list = [row[0] for row in rows]
         rg_list = [row[1] for row in rows]
@@ -111,7 +115,7 @@ def main():
         futures = {executor.submit(call_search_function, fio, rg, types, adr,authr, patm)
                    : (fio, rg,types, adr,authr, patm) for fio, rg, types, adr,authr, patm in zip(fio_list, rg_list,type_p, adrs,auth, pat_nm)}
         for future in as_completed(futures):
-            fio, rg = futures[future]
+            fio, rg, id = futures[future]
             try:
                 result = future.result()
                 print(f"Result for {fio} (Reg. No: {rg}): {result}")
