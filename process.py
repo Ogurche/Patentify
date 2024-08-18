@@ -2,6 +2,12 @@ import psycopg2
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import os
 import re 
+import psycopg2
+from psycopg2.pool import SimpleConnectionPool
+
+# ... (остальная часть вашего кода)
+
+# Настройки пула соединений
 
 user = os.environ.get('DB_USER')
 password = os.environ.get('DB_PASSWORD')
@@ -18,6 +24,7 @@ DB_CONFIG = {
     'port': port,
 }
 
+pool = SimpleConnectionPool(minconn=5, maxconn=20, **DB_CONFIG)
 # pool = ThreadPoolExecutor(150)
 def split_names(text):
     text = re.sub(r'\(\b[A-Za-zА-Яа-я]{2,3}\b\)', '', text).strip()
@@ -29,33 +36,33 @@ def process_names(text):
     processed_names = [name.strip().lower() for name in names]
     return ','.join(processed_names)
 
+# ... (остальная часть вашего код
 # Функция для выполнения поисковой функции для одного ФИО и регистрационного номера
 def call_search_function(fio, rg, type_p, adrs,auth, pat_nm):
     # conn = None 
     try:
-        conn = psycopg2.connect(**DB_CONFIG)
-        conn.autocommit = True
-        cur = conn.cursor()
-        fio = process_names(fio)
-        cur.execute('''SELECT o_inn, o_full_name , o_id FROM inn_matching.find_similarity_v2(
-                        i_patent_holder := %s
-                        , i_reg_num := %s
-                        , i_patent_type := %s
-                        , i_address := %s
-                        , i_author := %s
-                        , i_invent_name := %s
-                        , upload_id := 20232)'''
-                    , (fio, rg, type_p, adrs,auth, pat_nm))
-        result = cur.fetchone()
-        cur.close()
-        conn.close()
-        return result
-    except Exception as e:
-        print(f"Error processing {fio}: {e}")
+        with pool.getconn() as conn:
+            with conn.cursor() as cur:
+                conn.autocommit = True
+                cur = conn.cursor()
+                fio = process_names(fio)
+                cur.execute('''SELECT o_inn, o_full_name , o_id FROM inn_matching.find_similarity_v2(
+                                i_patent_holder := %s
+                                , i_reg_num := %s
+                                , i_patent_type := %s
+                                , i_address := %s
+                                , i_author := %s
+                                , i_invent_name := %s
+                                , upload_id := 20233)'''
+                            , (fio, rg, type_p, adrs,auth, pat_nm))
+                result = cur.fetchone()
+                return result
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(f"Error while getting data from PostgreSQL: {error}")
+        pool.putconn(conn)
         return None
-    # finally:
-    #     if conn:
-    #         pool.putconn(conn)
+    finally:
+        pool.putconn(conn)
 
 # Функция для получения всех ФИО и регистрационных номеров из таблицы патентов
 def get_all_fio():
@@ -84,7 +91,7 @@ def get_all_fio():
                             p.reg_number IS NULL    
                             and s.patent_holder  != 'NULL'
                             and s.patent_holder IS NOT NULL
-                            and s.id >= 660000
+                            and s.id >= 662576
                         order by s.patent_holder asc
                         ''')
         
